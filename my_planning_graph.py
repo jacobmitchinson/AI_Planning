@@ -549,12 +549,20 @@ class PlanningGraph():
                     return False
         return True
 
+    def level_cost(self, goal):
+        for level_number, state_node_set in enumerate(self.s_levels):
+           for state_node in state_node_set:
+               if state_node.symbol == goal and state_node.is_pos:
+                   return level_number
+        return 0
+
     def h_levelsum(self) -> int:
         """The sum of the level costs of the individual goals (admissible if goals independent)
 
         :return: int
         """
         level_sum = 0
-        # TODO implement
-        # for each goal in the problem, determine the level cost, then add them together
+        for goal in self.problem.goal:
+            level_sum += self.level_cost(goal)
+
         return level_sum
