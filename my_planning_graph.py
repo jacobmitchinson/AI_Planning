@@ -542,8 +542,8 @@ class PlanningGraph():
             for s2_action in node_s2.parents:
                 # return true if is mutex
                 if s1_action.is_mutex(s2_action):
-                    return True
-        return False
+                    return False
+        return True
 
     def h_levelsum(self) -> int:
         """The sum of the level costs of the individual goals (admissible if goals independent)
