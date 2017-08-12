@@ -475,8 +475,11 @@ class PlanningGraph():
         :return: bool
         """
 
+        # iterate through all node_a1 preconditions
         for a1_preconditions in node_a1.parents:
+            # iterate through all node_a2 preconditions
             for a2_preconditions in node_a2.parents:
+                # return true if is mutex
                 if a1_preconditions.is_mutex(a2_preconditions):
                     return True
         return False
