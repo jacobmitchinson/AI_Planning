@@ -541,7 +541,7 @@ class PlanningGraph():
             # iterate through all node_s2 actions
             for s2_action in node_s2.parents:
                 # return true if is mutex
-                if s1_action.is_mutex(s2_action):
+                if not s1_action.is_mutex(s2_action):
                     return False
         return True
 
