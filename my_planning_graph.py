@@ -200,7 +200,7 @@ def mutexify(node1: PgNode, node2: PgNode):
 class PlanningGraph():
     """
     A planning graph as described in chapter 10 of the AIMA text. The planning
-    graph can be used to reason about 
+    graph can be used to reason about
     """
 
     def __init__(self, problem: Problem, state: str, serial_planning=True):
@@ -303,13 +303,32 @@ class PlanningGraph():
         :return:
             adds A nodes to the current level in self.a_levels[level]
         """
-        # TODO add action A level to the planning graph as described in the Russell-Norvig text
+        # Add action A level to the planning graph as described in the Russell-Norvig text
         # 1. determine what actions to add and create those PgNode_a objects
         # 2. connect the nodes to the previous S literal level
         # for example, the A0 level will iterate through all possible actions for the problem and add a PgNode_a to a_levels[0]
-        #   set iff all prerequisite literals for the action hold in S0.  This can be accomplished by testing
+        #   set if all prerequisite literals for the action hold in S0.  This can be accomplished by testing
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
+
+        # create array to store actions
+        action_nodes = []
+        # get level set from level
+        level_set = self.s_levels[level]
+        # iterate through all available actions
+        for action in self.all_actions:
+            # create an action node from the action
+            action_node = PgNode_a(action)
+            # verify that that the prenodes satify the preconditions
+            if action_node.prenodes.issubset(self.s_levels[level]):
+                # append this action node to array of action nodes
+                action_nodes.append(action_node)
+                # connect action node to the appropriate state nodes for the level
+                for state_node in level_set:
+                    state_node.children.add(action_node)
+                    state_node.parents.add(state_node)
+        # create the new level from the action nodes previously created
+        self.a_levels.append(action_nodes)
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -320,7 +339,7 @@ class PlanningGraph():
         :return:
             adds S nodes to the current level in self.s_levels[level]
         """
-        # TODO add literal S level to the planning graph as described in the Russell-Norvig text
+        # Add literal S level to the planning graph as described in the Russell-Norvig text
         # 1. determine what literals to add
         # 2. connect the nodes
         # for example, every A node in the previous level has a list of S nodes in effnodes that represent the effect
@@ -328,6 +347,22 @@ class PlanningGraph():
         #   may be "added" to the set without fear of duplication.  However, it is important to then correctly create and connect
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
+
+        # get the previous level action nodes
+        previous_action_nodes = self.a_levels[level - 1]
+        # create set to store state nodes
+        state_nodes_for_level = set()
+        # iterate through previous action nodes
+        for action_node in previous_action_nodes:
+            # iterate through state nodes in effect nodes
+            for state_node in action_node.effnodes:
+                # append state node to state nodes for level
+                state_nodes_for_level.add(state_node)
+                # connect parent and child nodes for both action and state nodes
+                state_node.parents.add(action_node)
+                action_node.children.add(state_node)
+        # append state nodes for level to state levels
+        self.s_levels.append(state_nodes_for_level)
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
@@ -390,7 +425,7 @@ class PlanningGraph():
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
-        Test a pair of actions for mutual exclusion, returning True if the 
+        Test a pair of actions for mutual exclusion, returning True if the
         effect of one action is the negation of a precondition of the other.
 
         HINT: The Action instance associated with an action node is accessible
