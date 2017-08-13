@@ -562,6 +562,7 @@ class PlanningGraph():
         :return: int
         """
         level_sum = 0
+        # iterate through each goal and compute the level cost and append this to total sum
         for goal in self.problem.goal:
             level_sum += self.level_cost(goal)
 
